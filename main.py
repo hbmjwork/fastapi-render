@@ -38,7 +38,7 @@ async def get_arquivos():
         )
              
         cursor = conn.cursor()
-        cursor.execute("SELECT nome FROM arquivos LIMIT 100", binary=True)
+        cursor.execute("SELECT nome FROM arquivos LIMIT 100")
         data = cursor.fetchone()[0]
         conn.commit()
         cursor.close()
