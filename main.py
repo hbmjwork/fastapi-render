@@ -5,7 +5,7 @@ from psycopg2 import connect
 
 app = FastAPI( upload_max_size=1073741824, )
 
-url = str(getenv("P_URL","").replace("postgres://", "")
+url = str(getenv("P_URL","")).replace("postgres://", "")
 user = database = url.split(":")[0] if url else "postgres"
 password = url.split("@")[0].replace(database,"").replace(":","") if url else "postgres" 
 host = url.split("@")[1].replace(database,"").replace("/","") if url else "localhost"
