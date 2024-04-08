@@ -4,6 +4,10 @@ from fastapi.responses import HTMLResponse
 from psycopg2 import connect
 from os import getenv
 
+from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy.orm import sessionmaker
+
+
 app = FastAPI( upload_max_size=1073741824, )
 url = str(getenv("P_URL","")).replace("postgres://", "")
 user = database = url.split(":")[0] if url else "postgres"
@@ -17,9 +21,30 @@ async def root():
 
 
 @app.get("/bd")
-async def root():
+async def get_bd():
     return {"u": user, "p": password, "h": host, "url": getenv("P_URL","<VAZIO>")}
 
+
+@app.get("/arquivos", response_class=HTMLResponse)
+async def get_arquivos():
+    engine = create_engine(f"postgresql://{user}:{password}@{host}/{database}")
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    arquivos = Table("arquivos", MetaData(), autoload_with=engine)
+    with SessionLocal() as session:
+        query = session.query(arquivos).all()
+        arquivos_html = ""
+        for arquivo in query:
+            arquivos_html += f"<p>Nome: {arquivo.nome}, Conteúdo: {arquivo.conteudo}</p>"
+        
+        return f"""
+        <html><head><title>Arquivos</title></head>
+            <body>
+                <h1>Arquivos</h1>
+                {arquivos_html}
+            </body>
+        </html>
+        """
+    
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
@@ -54,4 +79,4 @@ async def upload(file: UploadFile = File(...)):
         )
 
     except Exception as e:
-        return HTMLResponse(f"<h1>Erro ao receber arquivo: {e}</h1>")
+        return HTMLResponse(f"<h1>Erro ao receber arquivo: {e} - {conn}</h1>")
