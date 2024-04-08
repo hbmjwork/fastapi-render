@@ -11,7 +11,7 @@ from fastapi import Form
 
 from sqlmodel import SQLModel, create_engine, Session, Field
 
-class File(SQLModel, table=True):
+class FileRegister(SQLModel, table=True):
     __tablename__ = "arquivos"
     id: Optional[int] = Field(default=None, primary_key=True)
     nome: str
@@ -158,7 +158,7 @@ async def uploadfile(file: UploadFile = File(...)):
     # Criar uma nova sessão do banco de dados
     with Session(engine) as session:
         # Criar um novo objeto File com o nome e o conteúdo do arquivo
-        new_file = File(nome=file.filename, conteudo=contents_file)
+        new_file = FileRegister(nome=file.filename, conteudo=contents_file)
         
         # Adicionar o novo objeto ao banco de dados
         session.add(new_file)
