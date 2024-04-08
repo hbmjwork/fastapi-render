@@ -14,7 +14,6 @@ user = database = url.split(":")[0] if url else "postgres"
 password = url.split("@")[0].replace(database,"").replace(":","") if url else "postgres" 
 host = url.split("@")[1].replace(database,"").replace("/","") if url else "localhost"
 
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -27,23 +26,33 @@ async def get_bd():
 
 @app.get("/arquivos", response_class=HTMLResponse)
 async def get_arquivos():
-    engine = create_engine(f"postgresql://{user}:{password}@{host}/{database}")
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    arquivos = Table("arquivos", MetaData(), autoload_with=engine)
-    with SessionLocal() as session:
-        query = session.query(arquivos).all()
-        arquivos_html = ""
-        for arquivo in query:
-            arquivos_html += f"<p>Nome: {arquivo.nome}, Conteúdo: {arquivo.conteudo}</p>"
+    try:
+        # Conectar ao Postgresql
         
-        return f"""
-        <html><head><title>Arquivos</title></head>
-            <body>
-                <h1>Arquivos</h1>
-                {arquivos_html}
-            </body>
-        </html>
-        """
+        conn = connect(
+            database=database,
+            user=user,
+            password=password,
+            host=host,
+            port="5432",
+        )
+        contents_file = await file.read()        
+        cursor = conn.cursor()
+        cursor.execute("SELECT image_data FROM images WHERE id = %s", [image_id], binary=True)
+        data = cursor.fetchone()[0]
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return HTMLResponse(
+            """
+            <h1>Registro persistido!</h1>
+            <p>Nome: {}</p>
+            """.format(data)
+        )
+
+    except Exception as e:
+        return HTMLResponse(f"<h1>Erro ao receber arquivo: {e} - {conn}</h1>")    
     
 
 @app.post("/upload")
