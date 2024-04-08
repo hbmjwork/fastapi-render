@@ -60,7 +60,7 @@ async def create_file(
     
 
 @app.post("/salvar")
-async def salvar_dados(request: Request):
+async def salvar(request: Request):
     try:
         # Obter dados do corpo da requisição
         data = await request.form()
@@ -103,7 +103,7 @@ async def salvar_dados(request: Request):
 
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload(file: UploadFile = File(...)):
     try:
         # Conectar ao Postgresql
         
