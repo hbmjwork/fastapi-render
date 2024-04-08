@@ -36,9 +36,9 @@ async def get_arquivos():
             host=host,
             port="5432",
         )
-        contents_file = await file.read()        
+             
         cursor = conn.cursor()
-        cursor.execute("SELECT image_data FROM images WHERE id = %s", [image_id], binary=True)
+        cursor.execute("SELECT nome FROM arquivos LIMIT 100", binary=True)
         data = cursor.fetchone()[0]
         conn.commit()
         cursor.close()
