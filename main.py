@@ -37,7 +37,7 @@ async def upload(file: UploadFile = File(...)):
         cursor = conn.cursor()
         cursor.execute(
                 """
-                INSERT INTO arquivos (nome, conteudo)
+                INSERT INTO public.arquivos (nome, conteudo)
                 VALUES (%s, %s)
                 """, (file.filename, contents_file),
         )
