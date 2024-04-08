@@ -14,8 +14,8 @@ from sqlmodel import SQLModel, create_engine, Session, Field
 class File(SQLModel, table=True):
     __tablename__ = "arquivos"
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str
-    content: bytes
+    nome: str
+    conteudo: bytes
 
 
 app = FastAPI( upload_max_size=1073741824, )
@@ -150,13 +150,13 @@ async def upload_file(file: UploadFile = File(...)):
 @app.post("/uploadfile/")
 async def upload_file(file: UploadFile = File(...)):
     # Ler o conteúdo do arquivo
-    contents = await file.read()
+    contents_file = await file.read()
     engine = create_engine(f"postgresql+asyncpg://{user}:{password}@{host}/{database}")
     
     # Criar uma nova sessão do banco de dados
     with Session(engine) as session:
         # Criar um novo objeto File com o nome e o conteúdo do arquivo
-        new_file = File(name=file.filename, content=contents)
+        new_file = File(nome=file.filename, conteudo=contents_file)
         
         # Adicionar o novo objeto ao banco de dados
         session.add(new_file)
