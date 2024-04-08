@@ -3,6 +3,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse
 from psycopg2 import connect
 from os import getenv
+import shutil
 
 app = FastAPI( upload_max_size=1073741824, )
 
