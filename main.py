@@ -16,7 +16,7 @@ async def root():
 
 @app.get("/bd")
 async def root():
-    return {"u": user, "p": password, 'h': host}
+    return {"u": user, "p": password, "h": host}
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
