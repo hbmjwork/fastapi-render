@@ -2,6 +2,7 @@ from typing import Optional
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse
 from psycopg2 import connect
+from os import getenv
 
 app = FastAPI( upload_max_size=1073741824, )
 
@@ -14,9 +15,11 @@ host = url.split("@")[1].replace(database,"").replace("/","") if url else "local
 async def root():
     return {"message": "Hello World"}
 
+
 @app.get("/bd")
 async def root():
     return {"u": user, "p": password, "h": host}
+
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
