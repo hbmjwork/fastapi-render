@@ -149,8 +149,8 @@ async def upload(file: UploadFile = File(...)):
         return HTMLResponse(f"<h1>Erro ao receber arquivo: {e}</h1>")
 
 
-@app.post("/uploadfile/")
-async def upload_file(file: UploadFile = File(...)):
+@app.post("/uploadfile")
+async def uploadfile(file: UploadFile = File(...)):
     # Ler o conteúdo do arquivo
     contents_file = await file.read()
     engine = create_engine(f"postgresql+asyncpg://{user}:{password}@{host}/{database}")
