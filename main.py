@@ -6,12 +6,16 @@ from psycopg2 import connect
 from os import getenv
 import shutil
 
+from typing import Annotated
+from fastapi import Form
+
 app = FastAPI( upload_max_size=1073741824, )
 
 url = str(getenv("P_URL","")).replace("postgres://", "")
 user = database = url.split(":")[0] if url else "postgres"
 password = url.split("@")[0].replace(database,"").replace(":","") if url else "postgres" 
 host = url.split("@")[1].replace(database,"").replace("/","") if url else "localhost"
+
 
 @app.get("/")
 async def root():
@@ -22,6 +26,19 @@ async def root():
 async def root():
     return {"u": user, "p": password, "h": host, "url": getenv("P_URL","<VAZIO>")}
 
+
+@app.post("/files/")
+async def create_file(
+    file: Annotated[bytes, File()],
+    fileb: Annotated[UploadFile, File()],
+    token: Annotated[str, Form()],
+):
+    return {
+        "file_size": len(file),
+        "token": token,
+        "fileb_content_type": fileb.content_type,
+    }
+    
 
 @app.post("/salvar")
 async def salvar_dados(request: Request):
@@ -78,13 +95,14 @@ async def upload_file(file: UploadFile = File(...)):
             host=host,
             port="5432",
         )
-        cursor = conn.cursor()
+        
 
         # Salvar arquivo no servidor
         with open(f"uploads/{file.filename}", "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
         # Ler arquivo e inserir no Postgresql
+        cursor = conn.cursor()
         with open(f"uploads/{file.filename}", "rb") as f:
             cursor.execute(
                 """
