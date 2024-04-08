@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi import FastAPI, File, UploadFile
+from fastapi import Request, Form
 from fastapi.responses import HTMLResponse
 from psycopg2 import connect
 from os import getenv
@@ -20,6 +21,49 @@ async def root():
 @app.get("/bd")
 async def root():
     return {"u": user, "p": password, "h": host, "url": getenv("P_URL","<VAZIO>")}
+
+
+@app.post("/salvar")
+async def salvar_dados(request: Request):
+    try:
+        # Obter dados do corpo da requisição
+        data = await request.form()
+        nome, conteudo = data["nome"], data["conteudo"]
+        conn = connect(
+            database=database,
+            user=user,
+            password=password,
+            host=host,
+            port="5432",
+        )
+
+        cursor = conn.cursor()
+
+        # Inserir dados na tabela
+        cursor.execute(
+            """
+            INSERT INTO arquivos (nome, conteudo)
+            VALUES (%s, %s)
+            """,
+            (nome, conteudo),
+        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return HTMLResponse(
+            """
+            <h1>Dados salvos com sucesso!</h1>
+            <p>Nome: {}</p>
+            <p>Conteúdo: {}</p>
+            """.format(
+                nome, conteudo
+            )
+        )
+
+    except Exception as e:
+        return HTMLResponse(f"<h1>Erro ao salvar dados: {e}</h1>")
 
 
 @app.post("/upload")
