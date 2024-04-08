@@ -18,7 +18,7 @@ async def root():
 
 @app.get("/bd")
 async def root():
-    return {"u": user, "p": password, "h": host}
+    return {"u": user, "p": password, "h": host, "url": url}
 
 
 @app.post("/upload")
