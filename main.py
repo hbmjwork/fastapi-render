@@ -114,14 +114,15 @@ async def upload(file: UploadFile = File(...)):
             host=host,
             port="5432",
         )
-        
-
+        contents_file = await file.read()        
+        cursor = conn.cursor()
+        '''
         # Salvar arquivo no servidor
         with open(f"uploads/{file.filename}", "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
         # Ler arquivo e inserir no Postgresql
-        cursor = conn.cursor()
+        
         with open(f"uploads/{file.filename}", "rb") as f:
             cursor.execute(
                 """
@@ -130,7 +131,13 @@ async def upload(file: UploadFile = File(...)):
                 """,
                 (file.filename, f.read()),
             )
-
+        '''
+        cursor.execute(
+                """
+                INSERT INTO arquivos (nome, conteudo)
+                VALUES (%s, %s)
+                """, (file.filename, contents_file),
+        )
         conn.commit()
         cursor.close()
         conn.close()
