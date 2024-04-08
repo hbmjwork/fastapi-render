@@ -9,7 +9,24 @@ import shutil
 from typing import Annotated
 from fastapi import Form
 
+from sqlmodel import SQLModel, create_engine, Session, Field
+
+class File(SQLModel, table=True):
+    __tablename__ = "arquivos"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    content: bytes
+
+
 app = FastAPI( upload_max_size=1073741824, )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 url = str(getenv("P_URL","")).replace("postgres://", "")
 user = database = url.split(":")[0] if url else "postgres"
@@ -128,3 +145,22 @@ async def upload_file(file: UploadFile = File(...)):
 
     except Exception as e:
         return HTMLResponse(f"<h1>Erro ao receber arquivo: {e}</h1>")
+
+
+@app.post("/uploadfile/")
+async def upload_file(file: UploadFile = File(...)):
+    # Ler o conteúdo do arquivo
+    contents = await file.read()
+    engine = create_engine(f"postgresql+asyncpg://{user}:{password}@{host}/{database}")
+    
+    # Criar uma nova sessão do banco de dados
+    with Session(engine) as session:
+        # Criar um novo objeto File com o nome e o conteúdo do arquivo
+        new_file = File(name=file.filename, content=contents)
+        
+        # Adicionar o novo objeto ao banco de dados
+        session.add(new_file)
+        session.commit()
+        session.refresh(new_file)
+    
+    return {"file uploaded": file.filename}
