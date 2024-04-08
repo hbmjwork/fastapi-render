@@ -18,6 +18,8 @@ class File(SQLModel, table=True):
     conteudo: bytes
 
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI( upload_max_size=1073741824, )
 app.add_middleware(
     CORSMiddleware,
