@@ -18,7 +18,7 @@ async def root():
 
 @app.get("/bd")
 async def root():
-    return {"u": user, "p": password, "h": host, "url": url}
+    return {"u": user, "p": password, "h": host, "url": getenv("P_URL","<VAZIO>")}
 
 
 @app.post("/upload")
